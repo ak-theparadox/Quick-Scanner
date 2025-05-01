@@ -124,7 +124,14 @@
 
                 if (code) {
                     stopScan();
-                    resultDiv.textContent = `Result: ${code.data}`;
+                    const resultText = code.data;
+                    // Check if the result is a URL, if so, make it a link
+                    const urlRegex = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)?\/?$/;
+                    if (urlRegex.test(resultText)) {
+                        resultDiv.innerHTML = `<a href="${resultText}" target="_blank" class="text-blue-600 hover:underline">${resultText}</a>`;
+                    } else {
+                        resultDiv.textContent = `Result: ${resultText}`;
+                    }
                     resultDiv.classList.remove('bg-gray-100');
                 } else {
                     requestAnimationFrame(scan);
