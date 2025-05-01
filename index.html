@@ -9,7 +9,8 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background: black;
+            background-color: #1a202c; /* Dark background */
+            color: #f7fafc; /* Light text for better contrast on dark background */
         }
         #video-container {
             width: 300px;
@@ -20,6 +21,7 @@
             margin-bottom: 1.5rem;
             position: relative;
             overflow: hidden;
+            background-color: #2d3748; /* Darker container background */
         }
         #video {
             width: 100%;
@@ -33,24 +35,41 @@
         #result {
             margin-top: 1.5rem;
             padding: 1rem;
-            background-color: #f7fafc;
+            background-color: #4a5568; /* Dark result background */
             border-radius: 0.75rem;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #718096;
             text-align: center;
             word-wrap: break-word;
-            display: none; /* Initially hide the result */
+            display: none;
+            color: #f7fafc;
         }
         .error-message {
-            color: #dc2626;
+            color: #f56565;
             margin-top: 0.75rem;
             padding: 0.5rem;
-            background-color: #fee2e2;
+            background-color: #2d3748;
             border-radius: 0.375rem;
-            border: 1px solid #fecaca;
+            border: 1px solid #f56565;
         }
         .scan-button {
             margin-top: 1rem;
+            background-color: #63b3ed;
+            color: #1a202c;
+            font-weight: 600;
+            border-radius: 0.375rem;
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            outline: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
+        .scan-button:hover {
+            background-color: #3182ce;
+        }
+        .scan-button:focus {
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5);
+        }
+
         #video-container::before {
             content: "";
             position: absolute;
@@ -76,16 +95,15 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 flex flex-col items-center justify-start min-h-screen py-8">
-    <h1 class="text-2xl font-semibold text-gray-800 mb-4">QR Code Scanner</h1>
+<body class="bg-gray-800 flex flex-col items-center justify-start min-h-screen py-8">
+    <h1 class="text-2xl font-semibold text-gray-200 mb-4">QR Code Scanner</h1>
     <div id="video-container" >
         <video id="video" ></video>
     </div>
     <canvas id="canvas"></canvas>
-    <div id="result" class="text-gray-700"></div>
+    <div id="result" class="text-gray-200"></div>
     <div id="errorMessage" class="error-message hidden"></div>
-
-    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js" async></script>
+    <button id="scanButton" class="scan-button">Scan New QR Code</button> <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js" async></script>
     <script>
         const video = document.getElementById('video');
         const canvas = document.getElementById('canvas');
@@ -93,6 +111,7 @@
         const errorMessageDiv = document.getElementById('errorMessage');
         const videoContainer = document.getElementById('video-container');
         const canvasContext = canvas.getContext('2d');
+        const scanButton = document.getElementById('scanButton'); // Get the button
 
         let scanning = false;
         let stream = null;
@@ -154,12 +173,12 @@
                     const resultText = code.data;
                     const urlRegex = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)?\/?$/;
                     if (urlRegex.test(resultText)) {
-                        resultDiv.innerHTML = `<a href="${resultText}" target="_blank" class="text-blue-600 hover:underline">${resultText}</a>`;
+                        resultDiv.innerHTML = `<a href="${resultText}" target="_blank" class="text-blue-400 hover:underline">${resultText}</a>`;
                     } else {
                         resultDiv.textContent = `Result: ${resultText}`;
                     }
                     resultDiv.classList.remove('bg-gray-100');
-                    resultDiv.style.display = 'block'; // Show the result
+                    resultDiv.style.display = 'block';
                 } else {
                     requestAnimationFrame(scan);
                 }
@@ -170,6 +189,13 @@
 
         // Start scanning automatically when the page loads
         startScan();
+
+        // Event listener for the button to start a new scan
+        scanButton.addEventListener('click', () => {
+            resultDiv.style.display = 'none'; // Hide previous result
+            resultDiv.innerHTML = ''; // Clear previous result
+            startScan(); // Start scanning again
+        });
     </script>
 </body>
 </html>
