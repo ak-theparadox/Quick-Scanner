@@ -4,59 +4,135 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Code Scanner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Basic styles (you can customize) */
         body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            text-align: center;
-            background-color: #f4f4f4;
+            font-family: 'Inter', sans-serif;
         }
-        #reader {
+        #video {
             width: 100%;
-            max-width: 600px; /* Adjust as needed */
-            margin: 20px auto;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            overflow: hidden; /* Ensure the video doesn't overflow */
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add shadow for depth */
+            max-width: 600px; /* Increased max-width for larger screens */
+            height: auto;
+            border-radius: 0.75rem; /* Rounded corners using Tailwind's scale */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* Shadow using Tailwind's scale */
+            margin-bottom: 1.5rem; /* Tailwind's margin scale */
+        }
+        #canvas {
+            display: none;
         }
         #result {
-            margin-top: 20px;
-            font-size: 18px;
-            color: #333;
+            margin-top: 1.5rem; /* Tailwind's margin scale */
+            padding: 1rem; /* Tailwind's padding scale */
+            background-color: #f7fafc; /* Tailwind's background color */
+            border-radius: 0.75rem; /* Rounded corners using Tailwind's scale */
+            border: 1px solid #e2e8f0; /* Tailwind's border color */
+            text-align: center;
+            word-wrap: break-word;
         }
-        h1 {
-            color: #555;
+        .error-message {
+            color: #dc2626; /* Tailwind's error color */
+            margin-top: 0.75rem; /* Tailwind's margin scale */
+            padding: 0.5rem; /* Tailwind's padding scale */
+            background-color: #fee2e2; /* Tailwind's background color for error */
+            border-radius: 0.375rem; /* Rounded corners using Tailwind's scale */
+            border: 1px solid #fecaca; /* Tailwind's border color for error */
+        }
+        .scan-button {
+            margin-top: 1rem;
         }
     </style>
-    <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
-<body>
-    <h1>QR Code Scanner</h1>
-    <div id="reader"></div>
-    <div id="result">Scanned result will appear here</div>
+<body class="bg-gray-100 flex flex-col items-center justify-start min-h-screen py-8">
+    <h1 class="text-2xl font-semibold text-gray-800 mb-4">QR Code Scanner</h1>
+    <video id="video" class="hidden"></video> <canvas id="canvas"></canvas>
+    <div id="result" class="text-gray-700"></div>
+    <button id="scanButton" class="scan-button bg-blue-500 hover:bg-blue-700 text-white font-semibold rounded-md py-2.5 px-5 focus:outline-none focus:shadow-outline">Start Scan</button>
+    <div id="errorMessage" class="error-message hidden"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <script>
-        const scanner = new Html5QrcodeScanner("reader", {
-            qrbox: {
-                width: 250,  // Adjust as needed
-                height: 250,
-            },
-            fps: 20, // Frames per second
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const resultDiv = document.getElementById('result');
+        const scanButton = document.getElementById('scanButton');
+        const errorMessageDiv = document.getElementById('errorMessage');
+        const canvasContext = canvas.getContext('2d');
+
+        let scanning = false;
+        let stream = null;
+
+        function showErrorMessage(message) {
+            errorMessageDiv.textContent = message;
+            errorMessageDiv.classList.remove('hidden');
+        }
+
+        function hideErrorMessage() {
+            errorMessageDiv.classList.add('hidden');
+            errorMessageDiv.textContent = ''; // Clear message
+        }
+
+        function startScan() {
+            hideErrorMessage();
+            scanning = true;
+            scanButton.textContent = 'Stop Scan';
+            video.classList.remove('hidden');
+
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+                .then(vidStream => {
+                    stream = vidStream;
+                    video.srcObject = stream;
+                    video.setAttribute('playsinline', 'true'); // Important for iOS Safari
+                    video.play();
+                    requestAnimationFrame(scan);
+                })
+                .catch(err => {
+                    scanning = false;
+                    scanButton.textContent = 'Start Scan';
+                    showErrorMessage(`Error accessing camera: ${err.message}.  Please ensure you have a camera and allow camera access.`);
+                    video.classList.add('hidden');
+                });
+        }
+
+        function stopScan() {
+            scanning = false;
+            scanButton.textContent = 'Start Scan';
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                video.srcObject = null;
+            }
+            video.classList.add('hidden');
+        }
+
+        scanButton.addEventListener('click', () => {
+            if (scanning) {
+                stopScan();
+            } else {
+                startScan();
+            }
         });
 
-        scanner.render(
-            (qrCodeMessage) => {
-                document.getElementById("result").innerText = "Scanned: " + qrCodeMessage;
-                // You can redirect the user to another page:
-                // window.location.href = qrCodeMessage;
-            },
-            (errorMessage) => {
-                // Handle error (optional)
-                console.error("Error:", errorMessage);
+        function scan() {
+            if (!scanning) return;
+
+            if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                canvas.height = video.videoHeight;
+                canvas.width = video.videoWidth;
+                canvasContext.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const imageData = canvasContext.getImageData(0, 0, canvas.width, canvas.height);
+                const code = jsQR(imageData.data, imageData.width, imageData.height);
+
+                if (code) {
+                    stopScan();
+                    resultDiv.textContent = `Result: ${code.data}`;
+                    resultDiv.classList.remove('bg-gray-100');
+                } else {
+                    requestAnimationFrame(scan);
+                }
+            } else {
+                requestAnimationFrame(scan);
             }
-        );
+        }
     </script>
 </body>
 </html>
