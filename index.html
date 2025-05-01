@@ -11,14 +11,14 @@
             font-family: 'Inter', sans-serif;
         }
         #video-container {
-            width: 250px; /* Even smaller square */
+            width: 250px;
             height: 250px;
             padding: 0.75rem;
             border-radius: 0.75rem;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             margin-bottom: 1.5rem;
             position: relative;
-            overflow: hidden; /* Clip the scanning animation */
+            overflow: hidden;
         }
         #video {
             width: 100%;
@@ -49,8 +49,6 @@
         .scan-button {
             margin-top: 1rem;
         }
-
-        /* Scanning animation */
         #video-container::before {
             content: "";
             position: absolute;
@@ -78,7 +76,7 @@
 </head>
 <body class="bg-gray-100 flex flex-col items-center justify-start min-h-screen py-8">
     <h1 class="text-2xl font-semibold text-gray-800 mb-4">QR Code Scanner</h1>
-    <div id="video-container" class="hidden">
+    <div id="video-container" >
         <video id="video" ></video>
     </div>
     <canvas id="canvas"></canvas>
@@ -113,7 +111,7 @@
             hideErrorMessage();
             scanning = true;
             scanButton.textContent = 'Stop Scan';
-            videoContainer.classList.remove('hidden');
+            //videoContainer.classList.remove('hidden'); // Removed this line
             video.classList.remove('hidden');
 
             navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
@@ -140,7 +138,7 @@
                 stream.getTracks().forEach(track => track.stop());
                 video.srcObject = null;
             }
-            videoContainer.classList.add('hidden');
+            videoContainer.classList.add('hidden'); // Hide the container
             video.classList.add('hidden');
         }
 
