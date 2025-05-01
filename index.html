@@ -1,52 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QR Code Scanner</title>
-  <script src="https://unpkg.com/html5-qrcode@2.3.10"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      margin: 20px;
-    }
-    #qr-reader {
-      width: 300px;
-      margin: auto;
-    }
-    #result {
-      margin-top: 20px;
-      font-size: 1.2em;
-      color: green;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Scanner</title>
+    <style>
+        /* Basic styles (you can customize) */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+            background-color: #f4f4f4;
+        }
+        #reader {
+            width: 100%;
+            max-width: 600px; /* Adjust as needed */
+            margin: 20px auto;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            overflow: hidden; /* Ensure the video doesn't overflow */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add shadow for depth */
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #333;
+        }
+        h1 {
+            color: #555;
+        }
+    </style>
+    <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
 <body>
-  <h1>QR Code Scanner</h1>
-  <div id="qr-reader"></div>
-  <div id="result"></div>
+    <h1>QR Code Scanner</h1>
+    <div id="reader"></div>
+    <div id="result">Scanned result will appear here</div>
+    <script>
+        const scanner = new Html5QrcodeScanner("reader", {
+            qrbox: {
+                width: 250,  // Adjust as needed
+                height: 250,
+            },
+            fps: 20, // Frames per second
+        });
 
-  <script>
-    function onScanSuccess(decodedText, decodedResult) {
-      document.getElementById('result').innerText = `Scanned: ${decodedText}`;
-      // Optional: Stop scanning after one successful read
-      html5QrCode.stop().then(() => {
-        console.log("QR Code scanning stopped.");
-      });
-    }
-
-    const html5QrCode = new Html5Qrcode("qr-reader");
-    html5QrCode.start(
-      { facingMode: "environment" },
-      {
-        fps: 10,
-        qrbox: { width: 250, height: 250 }
-      },
-      onScanSuccess
-    ).catch(err => {
-      document.getElementById('result').innerText = `Error: ${err}`;
-    });
-  </script>
+        scanner.render(
+            (qrCodeMessage) => {
+                document.getElementById("result").innerText = "Scanned: " + qrCodeMessage;
+                // You can redirect the user to another page:
+                // window.location.href = qrCodeMessage;
+            },
+            (errorMessage) => {
+                // Handle error (optional)
+                console.error("Error:", errorMessage);
+            }
+        );
+    </script>
 </body>
 </html>
