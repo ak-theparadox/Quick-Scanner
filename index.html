@@ -10,20 +10,21 @@
         body {
             font-family: 'Inter', sans-serif;
         }
-        #video-container { /* New container for the video */
-            width: 300px; /* Fixed width for the square */
-            height: 300px; /* Fixed height for the square */
-            padding: 1rem; /* Padding around the video */
+        #video-container {
+            width: 250px; /* Even smaller square */
+            height: 250px;
+            padding: 0.75rem;
             border-radius: 0.75rem;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             margin-bottom: 1.5rem;
-            position: relative; /* Needed for absolute positioning of video */
+            position: relative;
+            overflow: hidden; /* Clip the scanning animation */
         }
         #video {
-            width: 100%; /* Video takes up the container's space */
+            width: 100%;
             height: 100%;
             border-radius: 0.75rem;
-            object-fit: cover; /* Ensure video covers the entire container */
+            object-fit: cover;
         }
         #canvas {
             display: none;
@@ -48,6 +49,31 @@
         .scan-button {
             margin-top: 1rem;
         }
+
+        /* Scanning animation */
+        #video-container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                to bottom,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.3) 50%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            animation: scan 2s linear infinite;
+        }
+        @keyframes scan {
+            0% {
+                transform: translateY(-100%);
+            }
+            100% {
+                transform: translateY(100%);
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-100 flex flex-col items-center justify-start min-h-screen py-8">
@@ -67,7 +93,7 @@
         const resultDiv = document.getElementById('result');
         const scanButton = document.getElementById('scanButton');
         const errorMessageDiv = document.getElementById('errorMessage');
-        const videoContainer = document.getElementById('video-container'); // Get the new container
+        const videoContainer = document.getElementById('video-container');
         const canvasContext = canvas.getContext('2d');
 
         let scanning = false;
@@ -80,21 +106,21 @@
 
         function hideErrorMessage() {
             errorMessageDiv.classList.add('hidden');
-            errorMessageDiv.textContent = ''; // Clear message
+            errorMessageDiv.textContent = '';
         }
 
         function startScan() {
             hideErrorMessage();
             scanning = true;
             scanButton.textContent = 'Stop Scan';
-            videoContainer.classList.remove('hidden'); // Show the container
-            video.classList.remove('hidden'); //show video
+            videoContainer.classList.remove('hidden');
+            video.classList.remove('hidden');
 
             navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
                 .then(vidStream => {
                     stream = vidStream;
                     video.srcObject = stream;
-                    video.setAttribute('playsinline', 'true'); // Important for iOS Safari
+                    video.setAttribute('playsinline', 'true');
                     video.play();
                     requestAnimationFrame(scan);
                 })
@@ -102,7 +128,7 @@
                     scanning = false;
                     scanButton.textContent = 'Start Scan';
                     showErrorMessage(`Error accessing camera: ${err.message}.  Please ensure you have a camera and allow camera access.`);
-                    videoContainer.classList.add('hidden'); // Hide the container
+                    videoContainer.classList.add('hidden');
                     video.classList.add('hidden');
                 });
         }
@@ -114,7 +140,7 @@
                 stream.getTracks().forEach(track => track.stop());
                 video.srcObject = null;
             }
-            videoContainer.classList.add('hidden'); // Hide the container
+            videoContainer.classList.add('hidden');
             video.classList.add('hidden');
         }
 
@@ -139,7 +165,6 @@
                 if (code) {
                     stopScan();
                     const resultText = code.data;
-                    // Check if the result is a URL, if so, make it a link
                     const urlRegex = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)?\/?$/;
                     if (urlRegex.test(resultText)) {
                         resultDiv.innerHTML = `<a href="${resultText}" target="_blank" class="text-blue-600 hover:underline">${resultText}</a>`;
