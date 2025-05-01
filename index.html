@@ -153,8 +153,7 @@
                 stream.getTracks().forEach(track => track.stop());
                 video.srcObject = null;
             }
-            videoContainer.classList.add('hidden');
-            video.classList.add('hidden');
+            video.classList.add('hidden'); //hide video
         }
 
 
@@ -194,6 +193,12 @@
         scanButton.addEventListener('click', () => {
             resultDiv.style.display = 'none'; // Hide previous result
             resultDiv.innerHTML = ''; // Clear previous result
+
+            if (stream) { //check if stream is defined
+                stream.getTracks().forEach(track => track.stop()); //stop any previous video stream
+                video.srcObject = null; //remove the video source
+            }
+
             startScan(); // Start scanning again
         });
     </script>
