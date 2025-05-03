@@ -32,7 +32,16 @@ const video = document.getElementById('video');
                 video.srcObject = stream;
                 video.setAttribute('playsinline', 'true');
                 video.play();
-                requestAnimationFrame(scan);
+                initializeBarcodeDetector()
+                    .then(() => requestAnimationFrame(scan))
+                    .catch(err => {
+                        scanning = false;
+                        showErrorMessage(`Error initializing barcode scanner: ${err.message}.`);
+                        videoContainer.classList.add('hidden');
+                        video.classList.add('hidden');
+                        scanButton.textContent = 'Scan New Code';
+                    });
+
             })
             .catch(err => {
                 scanning = false;
@@ -51,6 +60,15 @@ const video = document.getElementById('video');
             video.srcObject = null;
         }
         video.classList.add('hidden');
+        if (barcodeDetector) {
+            barcodeDetector.reset();
+        }
+    }
+
+    async function initializeBarcodeDetector() {
+        if (!barcodeDetector) {
+            barcodeDetector = new window.ZXing.BrowserMultiFormatReader();
+        }
     }
 
     async function scan() {
@@ -79,12 +97,11 @@ const video = document.getElementById('video');
             // If no QR code, try scanning for barcode
             if (!result) {
                 try {
-                    if (!barcodeDetector) {
-                        barcodeDetector = new window.ZXing.BrowserMultiFormatReader();
-                    }
-                    const barcodeResult = await barcodeDetector.decode(canvas);
-                    if (barcodeResult) {
-                        result = { format: barcodeResult.format, data: barcodeResult.text };
+                    if (barcodeDetector) {
+                        const barcodeResult = await barcodeDetector.decode(canvas);
+                        if (barcodeResult) {
+                            result = { format: barcodeResult.format, data: barcodeResult.text };
+                        }
                     }
                 } catch (error) {
                     console.error("Error scanning barcode:", error);
