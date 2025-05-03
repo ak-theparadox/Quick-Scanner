@@ -1,4 +1,4 @@
-const video = document.getElementById('video');
+ const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
     const resultDiv = document.getElementById('result');
     const errorMessageDiv = document.getElementById('errorMessage');
@@ -67,7 +67,12 @@ const video = document.getElementById('video');
 
     async function initializeBarcodeDetector() {
         if (!barcodeDetector) {
-            barcodeDetector = new window.ZXing.BrowserMultiFormatReader();
+             try {
+                barcodeDetector = await new window.ZXing.BrowserMultiFormatReader();
+             } catch(e){
+                console.error("Error initializing ZXing:", e);
+                throw e;
+             }
         }
     }
 
@@ -98,7 +103,8 @@ const video = document.getElementById('video');
             if (!result) {
                 try {
                     if (barcodeDetector) {
-                        const barcodeResult = await barcodeDetector.decode(canvas);
+                       // const barcodeResult = await barcodeDetector.decode(canvas);
+                        const barcodeResult = await barcodeDetector.decodeFromImage(canvas);
                         if (barcodeResult) {
                             result = { format: barcodeResult.format, data: barcodeResult.text };
                         }
