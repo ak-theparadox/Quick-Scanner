@@ -1,41 +1,50 @@
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Code Scanner</title>
-    <link rel="canonical"
-href="https://qscan.in/">
-    <script src="https://cdn.tailwindcss.com/4.1.11"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  "name": "Quick Scan",  "url": "https://qscan.in/" }
-</script>
-<meta property="og:site_name" content="Quick Scan">
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quick QR Scanner</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="canonical" href="https://qscan.in/" />
+  <meta property="og:site_name" content="Quick Scan" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Quick Scan",
+    "url": "https://qscan.in/"
+  }
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
 </head>
 
-<body class="bg-gray-800 flex flex-col items-center justify-start min-h-screen py-8">
-    <h1 class="text-2xl font-semibold text-gray-200 mb-4">Quick Scanner</h1>
-    <div id="video-container">
-        <video id="video"></video>
-    </div>
-    <canvas id="canvas"></canvas>
-    <div id="result" class="text-gray-200"></div>
-    <div id="errorMessage" class="error-message hidden"></div>
-    <button id="scanButton" class="scan-button">Scan New QR Code</button>
-    <p id="madewithlove">Made with 💛</p>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center px-4 py-10">
+  <h1 class="text-3xl font-semibold mb-6">📷 Quick QR Scanner</h1>
 
-<a href="/about.html" class="text-blue-600 underline">About</a>
+  <div id="video-container" class="relative w-72 h-72 bg-gray-800 rounded-xl overflow-hidden shadow-lg mb-6">
+    <video id="video" class="w-full h-full object-cover rounded-xl"></video>
+    <div class="absolute inset-x-0 top-0 h-1 bg-blue-400 animate-pulse opacity-70"></div>
+  </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js" async></script>
-    <script src="https://unpkg.com/@zxing/library@0.21.3" async></script>
-    <script src="script.js"></script>
+  <canvas id="canvas" class="hidden"></canvas>
+
+  <div id="result" class="hidden w-full max-w-xs bg-gray-800 text-sm rounded-lg p-4 text-center border border-gray-600 break-words mb-4"></div>
+
+  <div id="errorMessage" class="hidden text-red-400 bg-red-900/20 border border-red-600 text-sm rounded p-3 mb-4 w-full max-w-xs text-center"></div>
+
+  <button id="scanButton" class="bg-blue-500 hover:bg-blue-600 transition text-white font-medium px-6 py-2 rounded shadow">
+    Scan New QR Code
+  </button>
+
+  <p class="mt-8 text-sm text-gray-400">Made with 💛 by <a href="/about.html" class="underline hover:text-white">Quick Scan</a></p>
+
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js" async></script>
+  <script src="https://unpkg.com/@zxing/library@0.21.3" async></script>
+  <script src="script.js"></script>
 </body>
-
 </html>
